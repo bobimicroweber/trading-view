@@ -2,7 +2,7 @@
 // © selfworksbg
 
 //@version=5
-strategy("A4Crypto.com - 2022 STRATEGY", overlay=true, process_orders_on_close = true, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity,default_qty_value=100,pyramiding=0)
+strategy("A4Crypto.com - 2022 STRATEGY", commission_type=strategy.commission.percent, commission_value=0.10, overlay=true, process_orders_on_close = false, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity,default_qty_value=100,pyramiding=0)
 
 
 
@@ -21,8 +21,8 @@ inDateRange = time >= timestamp(syminfo.timezone, startYear, startMonth, startDa
 // ----------
 // Position
 // ----------
-takeProfit = input.float(2, minval=0.0, title='TakeProfit Percentage',step=0.1, group='Strategy: Position')
-stopLoss = input.float(4, minval=0.0, title='StopLoss Percentage',step=0.1, group='Strategy: Position')
+takeProfit = input.float(1, minval=0.0, title='TakeProfit Percentage',step=0.1, group='Strategy: Position')
+stopLoss = input.float(2, minval=0.0, title='StopLoss Percentage',step=0.1, group='Strategy: Position')
 
 
 
@@ -40,6 +40,14 @@ clr = close < open ? color.red : color.green
 
 startLong = nRes and close > open and inDateRange
 startShort = nRes and close < open  and inDateRange
+
+
+
+plotshape(startLong, title="LONG", style=shape.labelup, location=location.belowbar, size=size.small, text="HighBuy", transp=0, textcolor = #FFFFFF, color=#2962ff, transp=70)
+plotshape(startShort, title="SHORT", style=shape.labeldown, location=location.abovebar, size=size.small, text="HighSell", transp=0, textcolor = #FFFFFF, color=#ff4a68, transp=70)
+
+alertcondition(startLong, title='LONG', message='{ "quote_symbol": "USDT", "base_symbol": "SYMBOL", "side": "BUY" }')
+alertcondition(startShort, title='SHORT', message='{ "quote_symbol": "USDT", "base_symbol": "SYMBOL", "side": "SELL" }')
 
 
 if (startLong and (strategy.opentrades == 0))
