@@ -2,7 +2,7 @@
 // © selfworksbg
 
 //@version=5
-strategy("A4Crypto.com - 2022 STRATEGY", commission_type=strategy.commission.percent, commission_value=0.10, overlay=true, process_orders_on_close = false, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity,default_qty_value=100,pyramiding=0)
+strategy("A4Crypto.com - 2022 STRATEGY", commission_type=strategy.commission.percent, commission_value=0.10, overlay=true, process_orders_on_close = false, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity, default_qty_value=30,pyramiding=0)
 
 
 
