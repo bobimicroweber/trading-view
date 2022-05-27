@@ -1,0 +1,46 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © selfworksbg
+
+//@version=5
+strategy("A4Crypto.com - 2022 STRATEGY", overlay=true, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity,default_qty_value=100,pyramiding=0)
+
+
+
+// ----------
+// Date Range
+// ----------
+startYear = input.int(title='Start Date', defval=2022, minval=2010, maxval=3000, group='Strategy: Date Range', inline='1')
+startMonth = input.int(title='', defval=1, group='Strategy: Date Range', inline='1', options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+startDate = input.int(title='', defval=1, group='Strategy: Date Range', inline='1', options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31])
+endYear = input.int(title='End Date', defval=2023, minval=1800, maxval=3000, group='Strategy: Date Range', inline='2')
+endMonth = input.int(title='', defval=1, group='Strategy: Date Range', inline='2', options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+endDate = input.int(title='', defval=1, group='Strategy: Date Range', inline='2', options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31])
+inDateRange = time >= timestamp(syminfo.timezone, startYear, startMonth, startDate, 0, 0) and time < timestamp(syminfo.timezone, endYear, endMonth, endDate, 0, 0)
+
+
+// ----------
+// Position
+// ----------
+takeProfit = input.float(2, minval=0.0, title='TakeProfit Percentage',step=0.1, group='Strategy: Position')
+stopLoss = input.float(4, minval=0.0, title='StopLoss Percentage',step=0.1, group='Strategy: Position')
+
+
+
+
+ema1 = ta.ema(close, 200)
+plot(ema1, title="Ema 200", color=color.blue, linewidth=1, transp=0)
+
+startLong = ta.crossover(high, ema1)  and inDateRange
+
+
+
+
+
+if (startLong and (strategy.opentrades == 0))
+    strategy.entry("Long", strategy.long)
+    
+if (strategy.opentrades > 0)
+    base = strategy.opentrades.entry_price(0)
+    baseProfit = (base+((base/100)*takeProfit))
+    baseLoss = (base-((base/100)*stopLoss))
+    strategy.exit("Exit", "Long", limit = baseProfit, stop = baseLoss)
