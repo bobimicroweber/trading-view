@@ -2,7 +2,7 @@
 // © selfworksbg
 
 //@version=5
-strategy("A4Crypto.com - 2022 STRATEGY", overlay=true, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity,default_qty_value=100,pyramiding=0)
+strategy("A4Crypto.com - 2022 STRATEGY", overlay=true, process_orders_on_close = true, initial_capital=1000,currency=currency.USDT,default_qty_type=strategy.percent_of_equity,default_qty_value=100,pyramiding=0)
 
 
 
@@ -27,20 +27,39 @@ stopLoss = input.float(4, minval=0.0, title='StopLoss Percentage',step=0.1, grou
 
 
 
-ema1 = ta.ema(close, 200)
-plot(ema1, title="Ema 200", color=color.blue, linewidth=1, transp=0)
+bLess = input.bool(title="----- Volume Filter Type RMA -----", defval=true)
+AvrLength = input.int(2, minval=2, maxval=22, title="VF Average Length : 22")
+PercentFilter = input.int(165, maxval=200, minval=1, title="VF Percentage Filter : 72/200")
+xAavrVolume = ta.rma(volume, AvrLength) 
+nResLess =  ((volume * 100) / xAavrVolume) < PercentFilter ? 0 : volume
+nRes = bLess ? nResLess : na
+clr = close < open ? color.red : color.green
+//plot(nRes, color=clr, style = plot.style_columns, transp=20, title="Volume Filter")
 
-startLong = ta.crossover(high, ema1)  and inDateRange
 
 
-
+startLong = nRes and close > open and inDateRange
+startShort = nRes and close < open  and inDateRange
 
 
 if (startLong and (strategy.opentrades == 0))
     strategy.entry("Long", strategy.long)
     
+if (startShort and (strategy.opentrades == 0))
+    strategy.entry("Short", strategy.short)
+    
 if (strategy.opentrades > 0)
+
     base = strategy.opentrades.entry_price(0)
-    baseProfit = (base+((base/100)*takeProfit))
-    baseLoss = (base-((base/100)*stopLoss))
-    strategy.exit("Exit", "Long", limit = baseProfit, stop = baseLoss)
+    inLong = strategy.position_size > 0
+    inShort = strategy.position_size < 0
+
+    if (inLong)
+        baseProfit = (base+((base/100)*takeProfit))
+        baseLoss = (base-((base/100)*stopLoss))
+        strategy.exit("Exit", "Long", limit = baseProfit, stop = baseLoss)
+        
+    if (inShort)
+        baseProfit = (base-((base/100)*takeProfit))
+        baseLoss = (base+((base/100)*stopLoss))
+        strategy.exit("Exit", "Short", limit = baseProfit, stop = baseLoss)
